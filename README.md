@@ -58,8 +58,8 @@ go install github.com/nguyenvanduocit/confluence-mcp@latest
 The following environment variables are required for authentication:
 ```
 ATLASSIAN_HOST=your_confluence_host
-ATLASSIAN_EMAIL=your_email
-ATLASSIAN_TOKEN=your_token
+ATLASSIAN_TOKEN=your_confluence_PAT
+ATLASSIAN_PRIM=your_conflunce_trim_prefix
 ```
 
 You can set these directly in environment variables or through a `.env` file for local development.
@@ -103,7 +103,6 @@ Add to your MCP configuration file:
         "--rm",
         "-i",
         "-e", "ATLASSIAN_HOST=your_confluence_instance.atlassian.net",
-        "-e", "ATLASSIAN_EMAIL=your_email@example.com",
         "-e", "ATLASSIAN_TOKEN=your_atlassian_api_token",
         "ghcr.io/nguyenvanduocit/confluence-mcp:latest"
       ]

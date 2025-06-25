@@ -15,7 +15,6 @@ import (
 	"github.com/nguyenvanduocit/confluence-mcp/tools"
 )
 
-
 type CleanupFunc func()
 
 func main() {
@@ -30,7 +29,7 @@ func main() {
 	}
 
 	// Check required envs for Docker/production
-	requiredEnvs := []string{"ATLASSIAN_HOST", "ATLASSIAN_EMAIL", "ATLASSIAN_TOKEN"}
+	requiredEnvs := []string{"ATLASSIAN_HOST", "ATLASSIAN_TOKEN"}
 	missingEnvs := false
 	for _, env := range requiredEnvs {
 		if os.Getenv(env) == "" {
@@ -38,11 +37,10 @@ func main() {
 			missingEnvs = true
 		}
 	}
-	if missingEnvs && *streamableHttpPort == ""{
+	if missingEnvs && *streamableHttpPort == "" {
 		fmt.Println("Required environment variables missing. You must provide them via .env file or directly as environment variables.")
 		fmt.Println("If using docker: docker run -e ATLASSIAN_HOST=value -e ATLASSIAN_EMAIL=value -e ATLASSIAN_TOKEN=value ...")
 	}
-	
 
 	mcpServer := server.NewMCPServer(
 		"Confluence Tool",
@@ -60,22 +58,22 @@ func main() {
 	tools.RegisterGetCommentsPageTool(mcpServer)
 	tools.RegisterListSpacesTool(mcpServer)
 
-	 // Setup signal handling
+	// Setup signal handling
 	sigChan := make(chan os.Signal, 1)
 	signal.Notify(sigChan, os.Interrupt, syscall.SIGTERM)
 	var cleanupFunc CleanupFunc
-	
+
 	go func() {
 		if *streamableHttpPort != "" {
 			log.Println("Add endpoint path http://localhost:" + *streamableHttpPort + "/mcp")
-			streamableHttpServer := server.NewStreamableHTTPServer(mcpServer, server.WithEndpointPath("/mcp"),)
+			streamableHttpServer := server.NewStreamableHTTPServer(mcpServer, server.WithEndpointPath("/mcp"))
 			cleanupFunc = func() {
 				log.Println("Stopping Streamable HTTP server")
 				ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 				defer cancel()
 				streamableHttpServer.Shutdown(ctx)
 			}
-			
+
 			if err := streamableHttpServer.Start(fmt.Sprintf(":%s", *streamableHttpPort)); err != nil {
 				log.Fatalf("Server error: %v", err)
 			}
